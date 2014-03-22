@@ -63,8 +63,8 @@ Choropleth.Map = React.createClass({
     var cmp = this;
 
     queue()
-      .defer(d3.json, "/assets/data/us.json")
-      .defer(d3.tsv, "/assets/data/unemployment.tsv", function(d) {
+      .defer(d3.json, "/mbostock/raw/4090846/us.json")
+      .defer(d3.tsv, "unemployment.tsv", function(d) {
         cmp.rateById.set(d.id, +d.rate);
       })
       .await(function(error, us) {
