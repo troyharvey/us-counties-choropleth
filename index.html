@@ -75,14 +75,6 @@ Choropleth.Map = React.createClass({
       });
   },
 
-  renderStates: function() {
-    var path = React.DOM.path;
-
-    return path({
-      className: states,
-      d: this.props.path(states)
-    });
-  },
   render: function() {
     var cmp = this;
 
@@ -91,7 +83,7 @@ Choropleth.Map = React.createClass({
     var path = React.DOM.path;
 
     return svg({
-      className: "choropleth Blues",
+      className: "choropleth",
       width: this.props.width,
       height: this.props.height
     },
