@@ -1,109 +1,120 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <style>
-
-.counties {
-  fill: none;
-}
-
-.states {
-  fill: none;
-  stroke: #fff;
-  stroke-linejoin: round;
-}
-
-.q0-9 { fill:rgb(247,251,255); }
-.q1-9 { fill:rgb(222,235,247); }
-.q2-9 { fill:rgb(198,219,239); }
-.q3-9 { fill:rgb(158,202,225); }
-.q4-9 { fill:rgb(107,174,214); }
-.q5-9 { fill:rgb(66,146,198); }
-.q6-9 { fill:rgb(33,113,181); }
-.q7-9 { fill:rgb(8,81,156); }
-.q8-9 { fill:rgb(8,48,107); }
-
+  .counties {
+    fill: none;
+  }
+  .states {
+    fill: none;
+    stroke: #fff;
+    stroke-linejoin: round;
+  }
+  .q0-9 { fill:rgb(247,251,255); }
+  .q1-9 { fill:rgb(222,235,247); }
+  .q2-9 { fill:rgb(198,219,239); }
+  .q3-9 { fill:rgb(158,202,225); }
+  .q4-9 { fill:rgb(107,174,214); }
+  .q5-9 { fill:rgb(66,146,198); }
+  .q6-9 { fill:rgb(33,113,181); }
+  .q7-9 { fill:rgb(8,81,156); }
+  .q8-9 { fill:rgb(8,48,107); }
 </style>
 <body>
-<div id="react"></div>
+    <div id="react"></div>
 
-<script src="http://d3js.org/d3.v3.min.js"></script>
-<script src="http://d3js.org/queue.v1.min.js"></script>
-<script src="http://d3js.org/topojson.v1.min.js"></script>
-<script src="http://cdnjs.cloudflare.com/ajax/libs/react/0.10.0/react.min.js"></script>
-<script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="http://d3js.org/queue.v1.min.js"></script>
+    <script src="http://d3js.org/topojson.v1.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/react/0.10.0/react.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
+    <script>
 
-<script>
+var unemployment = {
+"id": 1001, "rate":  .097,
+"id": 1003, "rate":  .091,
+"id": 1005, "rate":  .134,
+"id": 1007, "rate":  .121,
+"id": 1009, "rate":  .099
+
+};
 
 var Choropleth = {};
-
 Choropleth.Map = React.createClass({
-  getDefaultProps: function() {
-    return {
-      width: 960,
-      height: 500
-    };
-  },
-
-  getInitialState: function() {
-    return {
-      counties: [],
-      states: {},
-      rateById: d3.map()
-    };
-  },
-
-  componentWillMount: function() {
-    var cmp = this;
-
-    queue()
-      .defer(d3.json, "/mbostock/raw/4090846/us.json")
-      .defer(d3.tsv, "unemployment.tsv", function(d) {
-        cmp.state.rateById.set(d.id, +d.rate);
-      })
-      .await(function(error, us) {
-        cmp.setState({
-          counties: topojson.feature(us, us.objects.counties).features,
-          states: topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; })
-        });
-      });
-  },
-
-  quantize: d3.scale.quantize()
-    .domain([0, 0.15])
-    .range(d3.range(9).map(function(i) {
-      return "q" + i + "-9";
-    })),
-
-  render: function() {
-    var cmp = this;
-
-    var svg = React.DOM.svg;
-    var g = React.DOM.g;
-    var path = React.DOM.path;
-
-    var pathGenerator = d3.geo.path();
-
-    return svg({
-      className: "choropleth Blues",
-      width: this.props.width,
-      height: this.props.height
+    getDefaultProps: function() {
+        return {
+            width: 960,
+            height: 500
+        };
     },
-               g({
-                 className: "counties"
-               },
-                 _.map(this.state.counties, function(county) {
-                   return path({
-                     className: cmp.quantize(cmp.state.rateById.get(county.id)),
-                     d: pathGenerator(county)
-                   });
-                 })),
-               path({
-                 className: "states",
-                 d: pathGenerator(this.state.states)
-               }));
-  }
-});
+    getInitialState: function() {
+        return {
+            counties: [],
+            states: {},
+            rateById: d3.map()
+        };
+    },
+    componentWillMount: function() {
+        this.refresh();
+    },
+    refresh: function() {
+      var cmp = this;
 
+      queue()
+          .defer(d3.json, "us.json")
+          .defer(d3.tsv, "unemployment.tsv", function(d) {
+              cmp.state.rateById.set(d.id, +d.rate);
+          })
+          .await(function(error, us) {
+              cmp.setState({
+                  counties: topojson.feature(us, us.objects.counties).features,
+                  states: topojson.mesh(us, us.objects.states, function(a, b) {
+                      return a !== b;
+                  })
+              });
+          });
+    },
+    refreshCounties: function() {
+      var cmp = this;
+      var updatedRates = cmp.getState(rateById);
+      updatedRates.set(13045, .15*Math.random());
+      cmp.setState({rateById: updatedRates});
+    },
+    quantize: d3.scale.quantize()
+        .domain([0, 0.15])
+        .range(d3.range(9).map(function(i) {
+            return "q" + i + "-9";
+        })),
+    render: function() {
+        var cmp = this;
+        var svg = React.DOM.svg;
+        var g = React.DOM.g;
+        var path = React.DOM.path;
+        var pathGenerator = d3.geo.path();
+
+        return svg({
+                className: "choropleth Blues",
+                width: this.props.width,
+                height: this.props.height
+            },
+            g({
+                    className: "counties"
+                },
+                _.map(this.state.counties, function(county) {
+                    return path({
+                        className: cmp.quantize(cmp.state.rateById.get(county.id)),
+                        d: pathGenerator(county)
+                    });
+                })),
+            path({
+                className: "states",
+                d: pathGenerator(this.state.states)
+            }));
+    }
+});
 React.renderComponent(Choropleth.Map(), document.getElementById("react"));
 
-</script>
+window.setInterval(function(){
+  Choropleth.Map().refreshCounties();
+}, 1000);
+
+    </script>
