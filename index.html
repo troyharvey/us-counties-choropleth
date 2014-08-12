@@ -61,23 +61,24 @@ Choropleth.Map = React.createClass({
 
       queue()
           .defer(d3.json, "us.json")
-          .defer(d3.tsv, "unemployment.tsv", function(d) {
-              cmp.state.rateById.set(d.id, +d.rate);
-          })
-          .await(function(error, us) {
+          .defer(d3.tsv, "unemployment.tsv")
+          .await(function(error, us, unemployment) {
+            var u = d3.map();
+            unemployment.forEach(function(county) {
+              u.set(county.id, county.rate);
+            });
+            u.set(8075, (.15 * Math.random()));
+            u.set(13095, (.15 * Math.random()));
+            u.set(18177, (.15 * Math.random()));
+            cmp.replaceState({rateById: null});
               cmp.setState({
                   counties: topojson.feature(us, us.objects.counties).features,
                   states: topojson.mesh(us, us.objects.states, function(a, b) {
                       return a !== b;
-                  })
+                  }),
+                  rateById: u
               });
           });
-    },
-    refreshCounties: function() {
-      var cmp = this;
-      var updatedRates = cmp.getState(rateById);
-      updatedRates.set(13045, .15*Math.random());
-      cmp.setState({rateById: updatedRates});
     },
     quantize: d3.scale.quantize()
         .domain([0, 0.15])
@@ -111,10 +112,10 @@ Choropleth.Map = React.createClass({
             }));
     }
 });
-React.renderComponent(Choropleth.Map(), document.getElementById("react"));
+var r = React.renderComponent(Choropleth.Map(), document.getElementById("react"));
 
 window.setInterval(function(){
-  Choropleth.Map().refreshCounties();
+  r.refresh();
 }, 1000);
 
     </script>
