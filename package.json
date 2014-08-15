@@ -1,0 +1,28 @@
+{
+  "name": "us-counties-choropleth",
+  "version": "0.0.0",
+  "description": "A d3.js dynamic choropleth chart from a csv data stream.",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/troyharvey/us-counties-choropleth.git"
+  },
+  "keywords": [
+    "d3js",
+    "javascript",
+    "data",
+    "choropleth"
+  ],
+  "author": "Troy Harvey <troyharvey@gmail>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/troyharvey/us-counties-choropleth/issues"
+  },
+  "homepage": "https://github.com/troyharvey/us-counties-choropleth",
+  "dependencies": {
+    "csv-parse": "0.0.6"
+  }
+}
